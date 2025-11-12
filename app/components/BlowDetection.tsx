@@ -22,6 +22,7 @@ export default function BlowDetection() {
   const lastBlowTime = useRef(0);
   const blowStartTime = useRef(0);
   const isCurrentlyBlowing = useRef(false);
+  const hasCountedThisBlow = useRef(false);
 
   // Blow detection with duration requirement
   const checkBlowing = () => {
@@ -46,6 +47,7 @@ export default function BlowDetection() {
       if (!isCurrentlyBlowing.current) {
         // Start of potential blow - record start time
         isCurrentlyBlowing.current = true;
+        hasCountedThisBlow.current = false;
         blowStartTime.current = currentTime;
       } else {
         // Continue blowing - check if duration requirement is met
@@ -56,7 +58,8 @@ export default function BlowDetection() {
         // 2. Enough time has passed since last successful blow (cooldown)
         if (
           blowingDuration >= blowDuration &&
-          currentTime - lastBlowTime.current > blowCooldown
+          currentTime - lastBlowTime.current > blowCooldown &&
+          !hasCountedThisBlow.current
         ) {
           // Successful blow detected!
           lastBlowTime.current = currentTime;
@@ -68,13 +71,14 @@ export default function BlowDetection() {
           }
 
           // Reset to prevent multiple counts from same blow
-          isCurrentlyBlowing.current = false;
+          hasCountedThisBlow.current = true;
         }
       }
     } else {
       // Volume dropped below threshold - reset blow tracking
       isCurrentlyBlowing.current = false;
       blowStartTime.current = 0;
+      hasCountedThisBlow.current = false;
     }
   };
 
@@ -131,6 +135,7 @@ export default function BlowDetection() {
     setCurrentVolume(0);
     isCurrentlyBlowing.current = false;
     blowStartTime.current = 0;
+    hasCountedThisBlow.current = false;
   };
 
   const resetBlowCounter = () => {
@@ -138,6 +143,7 @@ export default function BlowDetection() {
     lastBlowTime.current = 0;
     blowStartTime.current = 0;
     isCurrentlyBlowing.current = false;
+    hasCountedThisBlow.current = false;
   };
 
   // Cleanup on unmount
